@@ -1,0 +1,30 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ include "fider.fullname" . }}
+  labels:
+    {{- include "fider.labels" . | nindent 4 }}
+data:
+  HOST_DOMAIN: {{ required "fider.domain is required" .Values.fider.domain}}
+  EMAIL_NOREPLY: {{ .Values.fider.noreply }}
+  {{- if .Values.fider.smtp }}
+  EMAIL_SMTP_HOST: {{ .Values.fider.smtp.host }}
+  EMAIL_SMTP_PORT: {{ .Values.fider.smtp.port | quote }}
+  EMAIL_SMTP_USERNAME: {{  .Values.fider.smtp.username  | default "" |  quote }}
+  {{- end }}
+  {{- if .Values.fider.mailgun }}
+  EMAIL_MAILGUN_DOMAIN: {{ .Values.fider.mailgun.domain }}
+  EMAIL_MAILGUN_REGION: {{ .Values.fider.mailgun.region }}
+  {{- end }}
+  {{- if .Values.fider.facebook }}
+  OAUTH_FACEBOOK_APPID: {{ .Values.fider.facebook.id }}
+  {{- end }}
+  {{- if .Values.fider.google }}
+  OAUTH_GOOGLE_CLIENTID: {{ .Values.fider.google.id }}
+  {{- end }}
+  {{- if .Values.fider.github }}
+  OAUTH_GITHUB_CLIENTID: {{ .Values.fider.github.id }}
+  {{- end }}
+{{- if .Values.extraEnv }}
+{{ toYaml .Values.extraEnv | indent 2 }}
+{{- end }}

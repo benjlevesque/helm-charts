@@ -1,0 +1,81 @@
+{{ template "chart.header" . }}
+{{ template "chart.deprecationWarning" . }}
+
+{{ template "chart.badgesSection" . }}
+
+{{ template "chart.description" . }}
+
+{{ template "chart.homepageLine" . }}
+
+{{ template "chart.maintainersSection" . }}
+
+{{ template "chart.sourcesSection" . }}
+
+{{ template "chart.requirementsSection" . }}
+
+
+## Usage
+
+### tl;dr
+```
+helm repo add benjlevesque  https://blevesque-helm-charts.s3.fr-par.scw.cloud
+helm install fider \
+  --set fider.domain=mydomain.org \
+  --set fider.noreply=noreply@mydomain.org \
+  --set fider.databaseUrl=$(echo -n $DATABASE_URL | base64 -w 0) \
+  --set fider.jwtSecret=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9!@#$&*' | fold -w 64 | head -n 1 | base64 -w 0) \
+  --set fider.smtp.host=smtp.yourdomain.com \
+  --set fider.smtp.port=587 \
+  benjlevesque/fider
+```
+
+
+### Tutorial
+> The following steps use a fake SMTP server and a basic PostgresSQL configuration. This is NOT to be used in production.
+
+- Install [mailhog](https://github.com/mailhog/MailHog) to simulate a SMTP server
+```bash
+helm repo add codecentric https://codecentric.github.io/helm-charts
+helm install mailhog codecentric/mailhog
+```
+
+- Install a PostgresSQL instance
+```bash
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm install postgres \
+  --set postgresqlPassword=secretpassword,postgresqlDatabase=postgres \
+    bitnami/postgresql
+```
+
+- Create a `values.test.yaml` file with this content
+```
+fider:
+  domain: "localhost"
+  noreply: "noreply@yourdomain.com"
+  # postgres://postgres:secretpassword@postgres-postgresql:5432/postgres?sslmode=disable
+  databaseUrl: cG9zdGdyZXM6Ly9wb3N0Z3JlczpzZWNyZXRwYXNzd29yZEBwb3N0Z3Jlcy1wb3N0Z3Jlc3FsOjU0MzIvcG9zdGdyZXM/c3NsbW9kZT1kaXNhYmxl
+  # abcd
+  jwtSecret: YWJjZAo=
+  smtp:
+    host: mailhog
+    port: 1025
+```
+
+- Create the fider release
+```bash
+helm repo add benjlevesque  https://blevesque-helm-charts.s3.fr-par.scw.cloud
+helm install fider -f values.test.yaml benjlevesque/fider
+```
+
+- open two terminals and run these commands, one in each
+```bash
+kubectl port-forward svc/mailhog 8025
+# in another terminal
+kubectl port-forward svc/fider 8000:80
+```
+
+- You can now access http://localhost:8000 and play with fider. You will receive emails in Mailhog, at http://localhost:8025
+
+
+
+{{ template "chart.valuesSection" . }}

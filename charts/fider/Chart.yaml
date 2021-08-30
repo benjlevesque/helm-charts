@@ -1,0 +1,12 @@
+apiVersion: v2
+name: fider
+description: A Helm chart for Fider (non-official)
+type: application
+home: https://getfider.com/
+
+sources:
+ - https://github.com/getfider/fider
+ - https://github.com/benjlevesque/helm-charts/tree/main/fider
+
+version: 0.1.0
+appVersion: 0.19.1
